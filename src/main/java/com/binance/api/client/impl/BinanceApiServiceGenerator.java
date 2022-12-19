@@ -5,6 +5,7 @@ import com.binance.api.client.constant.BinanceApiConstants;
 import com.binance.api.client.exception.BinanceApiException;
 import com.binance.api.client.security.AuthenticationInterceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -33,6 +34,14 @@ public class BinanceApiServiceGenerator {
     }
 
     public static <S> S createService(Class<S> serviceClass, String apiKey, String secret) {
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        if (!httpClient.interceptors().contains(loggingInterceptor)) {
+            httpClient.addInterceptor(loggingInterceptor);
+            builder.client(httpClient.build());
+            retrofit = builder.build();
+        }
+
         if (!StringUtils.isEmpty(apiKey) && !StringUtils.isEmpty(secret)) {
             AuthenticationInterceptor interceptor = new AuthenticationInterceptor(apiKey, secret);
             if (!httpClient.interceptors().contains(interceptor)) {
